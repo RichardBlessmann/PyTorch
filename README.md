@@ -1,1 +1,1 @@
-This are my first trials for a neuronal network
+This is my first trial for a neuronal network
