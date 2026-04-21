@@ -19,19 +19,20 @@ be in wanted project base-directory:
 4. Clone the repository
 
 	git clone https://github.com/utiasDSL/gym-pybullet-drones.git
+
+
+6. Install dependencies
+
 	cd gym-pybullet-drones
-
-5. Install dependencies
-
 	pip install numpy scipy matplotlib pandas
 	pip install pybullet gym
 
-6. Install project
+7. Install project
 
 	pip install -e .
 	
 	
-7. Test the install
+8. Test the install
 
 	python example\fly.py
 or	python example\learn.py
