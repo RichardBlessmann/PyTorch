@@ -4,6 +4,7 @@ es ist zum Teil aus den vorherigen Testruns und tutorials entstanden zum teils v
 ich hab versucht üüüüberall Kommentare hinzumachen, damit du und ich es wieder nachvollziehen kiönnen was wie wo macht
 
 Genannte QUellen:
+
 	1. PyTorch official RL example (Policy Gradient)
 		[https://docs.pytorch.org/tutorials/intermediate/reinforcement_ppo.html]
 	2. OpenAI SpinningUp
