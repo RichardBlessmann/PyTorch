@@ -1,4 +1,3 @@
-This are my first trials for a neuronal network
 
 for install of gym-pybullet-drones on windows side:
 
@@ -39,4 +38,4 @@ be in wanted project base-directory:
 	python example\fly.py
 or	python example\learn.py
 	
-	
+
