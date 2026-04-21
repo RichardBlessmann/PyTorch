@@ -24,7 +24,7 @@ class MeinNetz(nn.Module):
             num *= s
         return num
 
-
+print(torch.cuda.is_available())
 
 netz = MeinNetz()
 #netz = netz.cuda()
