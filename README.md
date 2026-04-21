@@ -24,15 +24,17 @@ be in wanted project base-directory:
 6. Install dependencies
 
 	cd gym-pybullet-drones
+
 	pip install numpy scipy matplotlib pandas
+
 	pip install pybullet gym
 
-7. Install project
+8. Install project
 
 	pip install -e .
 	
 	
-8. Test the install
+9. Test the install
 
 	python example\fly.py
 or	python example\learn.py
