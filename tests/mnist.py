@@ -3,10 +3,9 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torch.nn as nn
 from torchvision import datasets, transforms
-from torch.autograd import Variable
 import os
 
-from test import optimizer  # Make sure this import is correct and needed
+from tests.test import optimizer  # Make sure this import is correct and needed
 
 kwargs = {'num_workers': 1, 'pin_memory': True} if torch.cuda.is_available() else {}
 
@@ -55,8 +54,8 @@ print(torch.cuda.is_available())
 model = Netz()
 
 
-if os.path.isfile('ZahlenNetz.pt'):
-    model.load_state_dict(torch.load('ZahlenNetz.pt'))
+if os.path.isfile('../ZahlenNetz.pt'):
+    model.load_state_dict(torch.load('../ZahlenNetz.pt'))
     model.eval()
     print("Netz wurde geladen")
 else :
@@ -102,4 +101,4 @@ for epoch in range(1, 8):
     train(epoch)
     test()
 
-torch.save(model.state_dict(), 'ZahlenNetz.pt')
+torch.save(model.state_dict(), '../ZahlenNetz.pt')
