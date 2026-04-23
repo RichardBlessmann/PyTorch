@@ -1,6 +1,10 @@
 import time
 import numpy as np
 import os
+import json
+
+from dateutil.tz import EPOCH
+
 from gym_pybullet_drones.envs.VelocityAviary import VelocityAviary
 from gym_pybullet_drones.utils.enums import DroneModel, Physics
 
@@ -27,7 +31,7 @@ from agent import Agent
 
 
 start = np.array([0, 0, 1.0])
-goal = np.array([5.0, 0.0, 1.0])
+goal = np.array([3.5, 0.0, 1.0])
 start_rpy = [0.0, 0.0, 1.57]
 
 agent = Agent()
@@ -36,10 +40,12 @@ agent = Agent()
 env = VelocityAviary(
     drone_model=DroneModel.CF2X,
     num_drones=1,
-    gui=True,
+    gui=False,
     obstacles=True,
     initial_xyzs = np.array([start]), #1 meter high
-    initial_rpys = np.array([start_rpy]) #roll, pitch, yaw in radian
+    initial_rpys = np.array([start_rpy]), #roll, pitch, yaw in radian
+    pyb_freq=480,
+    ctrl_freq=240,
 )
 #Time to initialize
 
@@ -67,8 +73,9 @@ else :
 print("Simulation started")
 
 EPISODES = 500
-STEPS_PER_EPISODE = 2400
-
+STEPS_PER_EPISODE = 1000
+log_data = []
+world_scale = 5.0
 for episode in range(EPISODES):
 
     # =================================================
@@ -81,7 +88,15 @@ for episode in range(EPISODES):
     pos = state[0:3]
     vel = state[10:13]
 
-    obs = np.concatenate([pos, goal, vel])
+
+    direction = goal - pos
+    dist = np.linalg.norm(direction)
+
+    obs = np.concatenate([
+        direction / 5.0,
+        vel / 3.0,
+        [dist / 5.0]
+    ])
 
     prev_dist = np.linalg.norm(pos - goal)
     episode_reward = 0
@@ -111,17 +126,41 @@ for episode in range(EPISODES):
         pos = state[0:3]
         vel = state[10:13]
 
-        next_obs = np.concatenate([pos, goal, vel])
+        direction = goal - pos
+        dist = np.linalg.norm(direction)
+
+        next_obs = np.concatenate([
+            direction / world_scale,
+            vel / 3.0,
+            [dist / world_scale]
+        ])
 
         # =================================================
         # Reward shaping
         # =================================================
         dist = np.linalg.norm(pos - goal)
 
+
+
+
         #closer to goal -> higher reward!
         #farther away -> negative reward
-        reward = (prev_dist - dist) * 10.0
+
+        progress = prev_dist - dist  # positive = good
+
+        reward = progress * 60.0
+
+        # hover / no progress penalty
+        if abs(progress) < 1e-3:
+            reward -= 0.2  # small, not huge
+
         prev_dist = dist
+
+        done = False
+
+        if pos[2] < 0.1:
+            reward -= 50
+            done = True
 
         # reached goal bonus
         if dist < 0.25:
@@ -138,16 +177,35 @@ for episode in range(EPISODES):
         agent.store(obs, action, reward, value, done)
 
         obs = next_obs
-
+        if episode % 100 == 0 and episode > 0:
+            log_data.append({
+                "episode": episode,
+                "step": step,
+                "pos": pos.tolist(),
+                "vel": vel.tolist(),
+                "goal": goal.tolist()
+            })
         # optional render speed
-        time.sleep(1 / 240)
-
+        #time.sleep(1 / 240)
         if done:
             break
+
 
     # =================================================
     # Learn after episode
     # =================================================
+
+    if episode % 100 == 0 and episode > 0:
+        os.makedirs("logs", exist_ok=True)
+        filename = f"logs/drone_log_ep_{episode}.json"
+
+        with open(filename, "w") as f:
+            json.dump(log_data, f, indent=2)
+
+        print(f"Saved log: {filename}")
+
+        log_data = []  # reset nach speichern
+
     agent.update()
 
     print(f"Episode {episode} | Reward: {episode_reward:.2f} | Final Dist: {dist:.2f}")

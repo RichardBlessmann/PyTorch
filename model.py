@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 class ActorCritic(nn.Module):
 
-    def __init__(self, obs_dim=9, act_dim=4):
+    def __init__(self, obs_dim=7, act_dim=4):
         super().__init__()
 
         self.shared = nn.Sequential(
@@ -16,6 +16,8 @@ class ActorCritic(nn.Module):
         )
 
         self.actor = nn.Linear(128, act_dim)
+
+        #evaluates the actions taken by the actor (policy) by estimating the expected future rewards!
         self.critic = nn.Linear(128, 1)
 
     def forward(self, x):

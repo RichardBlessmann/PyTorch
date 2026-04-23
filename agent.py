@@ -12,7 +12,7 @@ import torch.nn as nn
 class Agent:
 
     def __init__(self,
-                 obs_dim=9,
+                 obs_dim=7,
                  action_dim=4,
                  lr=0.01,
                  gamma=0.99,
