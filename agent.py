@@ -16,7 +16,7 @@ class Agent:
                  action_dim=4,
                  lr=0.01,
                  gamma=0.99,
-                 std=0.2):
+                 std=0.02):
         self.model = ActorCritic(obs_dim, action_dim)
         self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
 
@@ -90,7 +90,7 @@ class Agent:
         # -----------------------------
         states = torch.tensor(np.array(self.states), dtype=torch.float32)
         actions = torch.tensor(np.array(self.actions), dtype=torch.float32)
-        returns = torch.tensor(self.compute_returns()),
+        returns = torch.tensor(self.compute_returns(), dtype=torch.float32)
 
         returns = returns[0].float()
         values = torch.tensor(self.values, dtype=torch.float32)
@@ -178,4 +178,8 @@ class Agent:
         action = torch.clamp(action, -1.0, 1.0)
 
         return action.numpy(), value
+    def computeReward(self, goal, pos):
+
+
+        pass
 

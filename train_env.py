@@ -31,7 +31,7 @@ from agent import Agent
 
 
 start = np.array([0, 0, 1.0])
-goal = np.array([3.5, 0.0, 1.0])
+goal = np.array([2, 0.0, 1.0])
 start_rpy = [0.0, 0.0, 1.57]
 
 agent = Agent()
@@ -76,6 +76,41 @@ EPISODES = 500
 STEPS_PER_EPISODE = 1000
 log_data = []
 world_scale = 5.0
+
+
+def exp_goal_reward(pos, goal, scale=1.0):
+    dist = np.linalg.norm(pos - goal)
+    reward = np.exp(-scale * dist)
+    return reward
+
+def _computeReward(self):
+    state = self._getDroneStateVector(0)
+
+    pos = state[0:3]
+    att = state[7:10]
+    vel = state[10:13]
+    ang_vel = state[13:16]
+
+    targer_pos = np.array([0, 0, 1])
+    pos_err = np.linalg.norm(goal - pos)
+
+    att_err = np.linalg.norm(att)
+    vel_err = np.linalg.norm(vel)
+    ang_vel_err = np.linalg.norm(ang_vel)
+
+    W_pos_err = 1
+    W__att = 0
+    W_vel = 0
+    W_ang_vel = 0
+
+    reward = (-1 * W_pos_err * pos_err) + (-1 * W__att * att) + (-1 * W_vel * vel) + (-1 * W_ang_vel * ang_vel)
+
+    if pos_err < 0.0001:
+        reward += 1
+
+    return reward
+
+
 for episode in range(EPISODES):
 
     # =================================================
@@ -139,16 +174,12 @@ for episode in range(EPISODES):
         # Reward shaping
         # =================================================
         dist = np.linalg.norm(pos - goal)
-
-
-
-
         #closer to goal -> higher reward!
         #farther away -> negative reward
 
-        progress = prev_dist - dist  # positive = good
+        progress = np.clip(prev_dist - dist, -0.1, 0.1)  # positive = good
 
-        reward = progress * 60.0
+        reward = progress * 50.0
 
         # hover / no progress penalty
         if abs(progress) < 1e-3:
@@ -213,3 +244,5 @@ for episode in range(EPISODES):
 agent.save("drone_model.pth")
 env.close()
 print("Finished")
+
+
