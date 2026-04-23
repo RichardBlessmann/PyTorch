@@ -14,9 +14,9 @@ class Agent:
     def __init__(self,
                  obs_dim=7,
                  action_dim=4,
-                 lr=0.01,
+                 lr=1e-4,
                  gamma=0.99,
-                 std=0.02):
+                 std=0.1):
         self.model = ActorCritic(obs_dim, action_dim)
         self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
 
@@ -92,14 +92,15 @@ class Agent:
         actions = torch.tensor(np.array(self.actions), dtype=torch.float32)
         returns = torch.tensor(self.compute_returns(), dtype=torch.float32)
 
-        returns = returns[0].float()
         values = torch.tensor(self.values, dtype=torch.float32)
 
         # normalize returns
-        returns = (returns - returns.mean()) / (returns.std() + 1e-8)
+        #returns = (returns - returns.mean()) / (returns.std() + 1e-8)
 
         # advantage = better than expected?
         advantages = returns - values
+        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-5)
+        advantages = torch.clamp(advantages, -10, 10)
 
         # -----------------------------
         # Forward pass
@@ -122,12 +123,16 @@ class Agent:
         entropy = dist.entropy().mean()
 
         loss = actor_loss + 0.5 * critic_loss - 0.001 * entropy
+        if torch.isnan(loss):
+            print("LOSS IS NaN - stopping update")
+            return
 
         # -----------------------------
         # Backprop
         # -----------------------------
         self.optimizer.zero_grad()
         loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.model.parameters(), 0.5)
         self.optimizer.step()
 
         # -----------------------------
@@ -171,15 +176,14 @@ class Agent:
         # value means how good the situation is
         # =================================================
 
-        dist = torch.distributions.Normal(mean, self.std)
+        mean = torch.clamp(mean, -5.0, 5.0)
+        std = torch.tensor(self.std).clamp(0.05, 1.0)
+        dist = torch.distributions.Normal(mean, std)
+
         action = dist.sample()
 
         # keep in valid range
         action = torch.clamp(action, -1.0, 1.0)
 
-        return action.numpy(), value
-    def computeReward(self, goal, pos):
-
-
-        pass
+        return action.numpy(), value.item()
 

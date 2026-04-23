@@ -31,7 +31,7 @@ from agent import Agent
 
 
 start = np.array([0, 0, 1.0])
-goal = np.array([2, 0.0, 1.0])
+goal = np.array([0.5, 0.0, 1.0])
 start_rpy = [0.0, 0.0, 1.57]
 
 agent = Agent()
@@ -73,7 +73,7 @@ else :
 print("Simulation started")
 
 EPISODES = 500
-STEPS_PER_EPISODE = 1000
+STEPS_PER_EPISODE = 2400
 log_data = []
 world_scale = 5.0
 
@@ -177,26 +177,30 @@ for episode in range(EPISODES):
         #closer to goal -> higher reward!
         #farther away -> negative reward
 
-        progress = np.clip(prev_dist - dist, -0.1, 0.1)  # positive = good
+        progress = (prev_dist - dist)
 
-        reward = progress * 50.0
+        # 1. MAIN SIGNAL (movement)
+        reward = progress
 
-        # hover / no progress penalty
-        if abs(progress) < 1e-3:
-            reward -= 0.2  # small, not huge
+        # 2. SMALL SHAPING (helps near goal)
+        #reward += 0.01 * np.exp(-6.0 * dist)
 
-        prev_dist = dist
+        # 3. TIME PENALTY (prevents doing nothing)
+        #reward -= 0.002
 
         done = False
+        # 4. GOAL BONUSES (graduated)
+        if dist < 0.2:
+            reward += 1.0
 
-        if pos[2] < 0.1:
-            reward -= 50
+        if dist < 0.1:
+            reward += 3.0
             done = True
 
-        # reached goal bonus
-        if dist < 0.25:
-            reward += 100
-            terminated = True
+        # 5. CRASH PENALTY
+        if pos[2] < 0.1:
+            reward -= 5.0
+            done = True
 
         done = terminated or truncated
 
