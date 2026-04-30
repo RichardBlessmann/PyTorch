@@ -13,9 +13,9 @@ class Agent:
 
     def __init__(self,
                  obs_dim=7,
-                 action_dim=4,
+                 action_dim=3,
                  lr=1e-4,
-                 gamma=0.99,
+                 gamma=0.9, # should be between 0.9 and 0.99
                  std=0.1):
         self.model = ActorCritic(obs_dim, action_dim)
         self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
@@ -34,7 +34,7 @@ class Agent:
         #   std = 0.5  - very chaotic, much exploration
         self.std = std
 
-        # 4 action dimensions for vx, vy, vz and yaw_rate
+        # 3 action dimensions for vx, vy, vz
         self.act_dim = action_dim
 
         # # =================================================

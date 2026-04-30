@@ -143,10 +143,10 @@ for episode in range(EPISODES):
         # =================================================
         action, value = agent.act(obs)
 
-        vx, vy, vz, yaw_rate = action
+        vx, vy, vz = action
 
         action_env = np.array([
-            [vx * 2.0, vy * 2.0, vz * 1.0, yaw_rate]
+            [vx * 2.0, vy * 2.0, vz * 1.0]
         ])
 
         # =================================================
