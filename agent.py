@@ -100,7 +100,7 @@ class Agent:
         # advantage = better than expected?
         advantages = returns - values
         advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-5)
-        advantages = torch.clamp(advantages, -10, 10)
+        #advantages = torch.clamp(advantages, -10, 10)
 
         # -----------------------------
         # Forward pass
@@ -183,7 +183,7 @@ class Agent:
         action = dist.sample()
 
         # keep in valid range
-        action = torch.clamp(action, -1.0, 1.0)
+        #action = torch.clamp(action, -1.0, 1.0)
 
         return action.numpy(), value.item()
 
