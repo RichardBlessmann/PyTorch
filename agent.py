@@ -13,10 +13,10 @@ class Agent:
 
     def __init__(self,
                  obs_dim=7,
-                 action_dim=3,
+                 action_dim=4,
                  lr=1e-4,
-                 gamma=0.9, # should be between 0.9 and 0.99
-                 std=0.1):
+                 gamma=0.97, # should be between 0.9 and 0.99
+                 std=0.2):
         self.model = ActorCritic(obs_dim, action_dim)
         self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
 
@@ -139,12 +139,19 @@ class Agent:
         # Reset memory
         # -----------------------------
         self.reset_memory()
-
+        print("returns mean:", returns.mean().item())
         print(
             f"Update | Loss: {loss.item():.3f} "
             f"| Actor: {actor_loss.item():.3f} "
             f"| Critic: {critic_loss.item():.3f}"
         )
+
+        print(
+            f"Update | log_probs mean:: {log_probs.mean().item():.3f} "
+            f"| adv mean: {advantages.mean().item():.3f} "
+            f"| adv std: {advantages.std().item():.3f}"
+        )
+
 
     # =====================================================
     # SAVE MODEL
@@ -176,7 +183,7 @@ class Agent:
         # value means how good the situation is
         # =================================================
 
-        mean = torch.clamp(mean, -5.0, 5.0)
+        #mean = torch.clamp(mean, -5.0, 5.0)
         std = torch.tensor(self.std).clamp(0.05, 1.0)
         dist = torch.distributions.Normal(mean, std)
 

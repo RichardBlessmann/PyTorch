@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 class ActorCritic(nn.Module):
 
-    def __init__(self, obs_dim=7, act_dim=3):
+    def __init__(self, obs_dim=7, act_dim=4):
         super().__init__()
 
         self.shared = nn.Sequential(
@@ -23,7 +23,8 @@ class ActorCritic(nn.Module):
     def forward(self, x):
         x = self.shared(x)
 
-        action = torch.tanh(self.actor(x))
+        #action = torch.tanh(self.actor(x))
+        mean = self.actor(x)
         value = self.critic(x)
 
-        return action, value
+        return mean, value
